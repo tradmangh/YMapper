@@ -30,10 +30,13 @@ RUN apk add --no-cache wget
 # Copy built web assets from build stage
 COPY --from=build-env /app/build/web /usr/share/nginx/html
 
-EXPOSE 80
+# Update Nginx to listen on port 3000 instead of 80
+RUN sed -i 's/listen       80;/listen       3000;/g' /etc/nginx/conf.d/default.conf
+
+EXPOSE 3000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget --quiet --tries=1 --spider http://localhost/ || exit 1
+    CMD wget --quiet --tries=1 --spider http://localhost:3000/ || exit 1
 
 CMD ["nginx", "-g", "daemon off;"]
